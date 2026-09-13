@@ -32,6 +32,7 @@ def get_comfyui_revision():
 
 
 import sys
+import os
 import importlib.util
 import importlib.metadata
 import comfy.model_management as mm
@@ -66,6 +67,10 @@ def install_package(package, v=None, compare=True, compare_version=None):
             run_install = False
 
     if run_install:
+        # Dependency changes are reviewed centrally for the pinned Mac runtime.
+        if os.environ.get("EASY_USE_ALLOW_AUTO_INSTALL") != "1":
+            LOG.warning("Easy-Use automatic installation of %s is disabled; install reviewed dependencies manually.", package)
+            return False
         import subprocess
         package_command = package + '==' + v if v is not None else package
         PromptServer.instance.send_sync("easyuse-toast", {'content': f"Installing {package_command}...", 'duration': 5000})
